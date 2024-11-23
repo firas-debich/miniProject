@@ -1,10 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, Text, Dimensions } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
-
+import { getDatabase, ref, onValue } from 'firebase/database';
+import {database} from "../../firebaseConfig"
 export default function HomeScreen() {
   const [heartbeat, setHeartbeat] = useState(72);
+  const [data, setData] = useState(null);
 
+  useEffect(() => {
+    
+    const dataRef = ref(database, '/sensorData/heartRate'); 
+
+
+    const unsubscribe = onValue(dataRef, (snapshot) => {
+      const value = snapshot.val();
+      setData(value);
+    });
+
+
+    return () => unsubscribe();
+  }, []);
+  console.log("data",data)
   useEffect(() => {
     const interval = setInterval(() => {
       setHeartbeat((prev) => Math.max(60, Math.min(100, prev + (Math.random() * 4 - 2)))); 
